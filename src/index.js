@@ -1,15 +1,17 @@
+// restaurant-service/src/index.js
 const express = require('express');
 const mongoose = require('mongoose');
 require('dotenv').config();
+const restaurantRoutes = require('./routes/restaurantRoutes');
+const authMiddleware = require('./middleware/authMiddleware');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
+app.use(express.json()); // Middleware to parse JSON bodies
 
-app.get('/', (req, res) => {
-  res.send('Restaurant Service is Running...');
-});
+// Use restaurant routes
+app.use('/api/restaurants', restaurantRoutes);
 
 mongoose.connect(process.env.MONGO_URL)
   .then(() => {
@@ -18,4 +20,6 @@ mongoose.connect(process.env.MONGO_URL)
       console.log(`Restaurant Service running on port ${PORT}`);
     });
   })
-  .catch(err => console.log(err));
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+  });
