@@ -1,7 +1,8 @@
-// restaurant-service/src/controllers/restaurantController.js
 const restaurantService = require('../services/restaurantService');
 
-// Create a new restaurant
+/**
+ * Create a new restaurant.
+ */
 const createRestaurant = async (req, res) => {
   try {
     const restaurantData = req.body;
@@ -12,18 +13,40 @@ const createRestaurant = async (req, res) => {
   }
 };
 
-// Get restaurant by ID, including menu and reviews
+/**
+ * Get a restaurant by its ID (with owner, menu, and reviews).
+ */
 const getRestaurantById = async (req, res) => {
   try {
     const { restaurantId } = req.params;
-    const { restaurant, menu, reviews } = await restaurantService.getRestaurantById(restaurantId);
-    res.status(200).json({ restaurant, menu, reviews });
+    const data = await restaurantService.getRestaurantById(restaurantId);
+    res.status(200).json(data);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
-// Update the restaurant menu
+/**
+ * Get menu availability for a restaurant.
+ * Expects a query parameter: restaurantId.
+ */
+const getMenuAvailability = async (req, res) => {
+  try {
+    const { restaurantId } = req.query;
+    if (!restaurantId) {
+      return res.status(400).json({ message: 'restaurantId query parameter is required' });
+    }
+    // This function returns only the menu; the service layer can implement such a function.
+    const menu = await restaurantService.getMenu(restaurantId);
+    res.status(200).json({ menu });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+/**
+ * Update the restaurant's menu.
+ */
 const updateMenu = async (req, res) => {
   try {
     const { restaurantId } = req.params;
@@ -35,7 +58,9 @@ const updateMenu = async (req, res) => {
   }
 };
 
-// Add a review to a restaurant
+/**
+ * Add a review to the restaurant.
+ */
 const addReview = async (req, res) => {
   try {
     const { restaurantId } = req.params;
@@ -51,6 +76,7 @@ const addReview = async (req, res) => {
 module.exports = {
   createRestaurant,
   getRestaurantById,
+  getMenuAvailability,
   updateMenu,
   addReview,
 };
