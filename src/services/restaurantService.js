@@ -25,10 +25,22 @@ const addReview = async (restaurantId, reviewData) => {
   return review;
 };
 
+// Create menu for a restaurant
 const createMenu = async (restaurantId, menuItems) => {
-
   const newMenu = await restaurantRepository.createMenu(restaurantId, menuItems);
   return newMenu;
+};
+
+// Get menu for a restaurant by ID
+const getMenu = async (restaurantId) => {
+  try {
+    // Fetch menu items related to the restaurant
+    const menu = await restaurantRepository.getMenu(restaurantId);
+    return menu; // Return the menu items
+  } catch (error) {
+    console.error('Error fetching menu:', error.message);
+    throw new Error('Menu not found');
+  }
 };
 
 module.exports = {
@@ -36,5 +48,6 @@ module.exports = {
   getRestaurantById,
   updateMenu,
   addReview,
-  createMenu
+  createMenu,
+  getMenu, 
 };

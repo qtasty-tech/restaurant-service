@@ -32,8 +32,15 @@ const addReview = async (restaurantId, reviewData) => {
   return review;
 };
 
+// Create menu for a restaurant
 const createMenu = async (restaurantId, menuItems) => {
   const menu = await Menu.insertMany(menuItems.map(item => ({ ...item, restaurant: restaurantId })));
+  return menu;
+};
+
+// Get menu for a restaurant by ID
+const getMenu = async (restaurantId) => {
+  const menu = await Menu.find({ restaurant: restaurantId });
   return menu;
 };
 
@@ -42,5 +49,6 @@ module.exports = {
   getRestaurantById,
   updateMenu,
   addReview,
-  createMenu
+  createMenu,
+  getMenu, 
 };

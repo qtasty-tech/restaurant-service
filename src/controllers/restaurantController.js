@@ -34,12 +34,16 @@ const getMenuAvailability = async (req, res) => {
   try {
     const { restaurantId } = req.query;
     if (!restaurantId) {
+      console.log('Error: restaurantId query parameter is missing');
       return res.status(400).json({ message: 'restaurantId query parameter is required' });
     }
-    // This function returns only the menu; the service layer can implement such a function.
+
+    console.log('Received restaurantId:', restaurantId); // Log the restaurantId
+    
     const menu = await restaurantService.getMenu(restaurantId);
     res.status(200).json({ menu });
   } catch (error) {
+    console.error('Error checking menu availability:', error.message);
     res.status(400).json({ message: error.message });
   }
 };
