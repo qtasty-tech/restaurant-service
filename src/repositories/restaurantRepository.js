@@ -32,9 +32,15 @@ const addReview = async (restaurantId, reviewData) => {
   return review;
 };
 
+const createMenu = async (restaurantId, menuItems) => {
+  const menu = await Menu.insertMany(menuItems.map(item => ({ ...item, restaurant: restaurantId })));
+  return menu;
+};
+
 module.exports = {
   createRestaurant,
   getRestaurantById,
   updateMenu,
   addReview,
+  createMenu
 };

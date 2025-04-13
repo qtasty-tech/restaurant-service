@@ -1,10 +1,11 @@
+// restaurant-service/src/routes/restaurantRoutes.js
 const express = require('express');
 const restaurantController = require('../controllers/restaurantController');
 const authMiddleware = require('../middleware/authMiddleware');
 const router = express.Router();
 
+router.post('/:restaurantId/menu', authMiddleware, restaurantController.createMenu);  
 router.get('/menu', authMiddleware, restaurantController.getMenuAvailability);
-
 router.post('/', authMiddleware, restaurantController.createRestaurant);
 router.get('/:restaurantId', authMiddleware, restaurantController.getRestaurantById);
 router.put('/:restaurantId/menu', authMiddleware, restaurantController.updateMenu);

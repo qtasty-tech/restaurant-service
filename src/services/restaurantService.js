@@ -25,9 +25,16 @@ const addReview = async (restaurantId, reviewData) => {
   return review;
 };
 
+const createMenu = async (restaurantId, menuItems) => {
+
+  const newMenu = await restaurantRepository.createMenu(restaurantId, menuItems);
+  return newMenu;
+};
+
 module.exports = {
   createRestaurant,
   getRestaurantById,
   updateMenu,
   addReview,
+  createMenu
 };

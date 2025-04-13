@@ -44,6 +44,17 @@ const getMenuAvailability = async (req, res) => {
   }
 };
 
+const createMenu = async (req, res) => {
+  try {
+    const { restaurantId } = req.params;
+    const { menuItems } = req.body;  // Expecting menuItems to be an array of objects
+    const newMenu = await restaurantService.createMenu(restaurantId, menuItems);
+    res.status(201).json({ message: 'Menu created successfully', newMenu });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 /**
  * Update the restaurant's menu.
  */
@@ -79,4 +90,5 @@ module.exports = {
   getMenuAvailability,
   updateMenu,
   addReview,
+  createMenu 
 };
