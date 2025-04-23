@@ -6,6 +6,7 @@ const RestaurantSchema = new mongoose.Schema({
   location: { type: String, required: true },
   rating: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
+  isVerified: { type: Boolean, default: false } 
 });
 
 const Restaurant = mongoose.model('Restaurant', RestaurantSchema);

@@ -19,8 +19,13 @@ const createRestaurant = async (req, res) => {
 const getRestaurantById = async (req, res) => {
   try {
     const { restaurantId } = req.params;
-    const data = await restaurantService.getRestaurantById(restaurantId);
-    res.status(200).json(data);
+    const restaurant = await restaurantService.getRestaurantById(restaurantId);
+
+    if (!restaurant.isVerified) {
+      return res.status(400).json({ message: 'Restaurant is not verified yet.' });
+    }
+
+    res.status(200).json(restaurant);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
