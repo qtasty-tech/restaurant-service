@@ -6,7 +6,8 @@ const restaurantService = require('../services/restaurantService');
 const createRestaurant = async (req, res) => {
   try {
     const restaurantData = req.body;
-    const restaurant = await restaurantService.createRestaurant(restaurantData);
+    const imageFile = req.file; 
+    const restaurant = await restaurantService.createRestaurant(restaurantData, imageFile);
     res.status(201).json({ message: 'Restaurant created successfully', restaurant });
   } catch (error) {
     res.status(400).json({ message: error.message });

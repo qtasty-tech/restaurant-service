@@ -3,9 +3,10 @@ const express = require('express');
 const restaurantController = require('../controllers/restaurantController');
 const authMiddleware = require('../middleware/authMiddleware');
 const router = express.Router();
+const upload = require('../config/multer');
 
 router.get('/:id', authMiddleware, restaurantController.getAllRestaurants);
-router.post('/', authMiddleware, restaurantController.createRestaurant);
+router.post('/', authMiddleware, upload.single('image'), restaurantController.createRestaurant);
 router.get('/:restaurantId', authMiddleware, restaurantController.getRestaurantById);
 router.post('/:restaurantId/review', authMiddleware, restaurantController.addReview);
 

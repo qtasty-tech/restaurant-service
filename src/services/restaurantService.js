@@ -2,11 +2,14 @@
 const restaurantRepository = require('../repositories/restaurantRepository');
 
 // Create a new restaurant
-const createRestaurant = async (restaurantData) => {
-  const restaurant = await restaurantRepository.createRestaurant(restaurantData);
-  return restaurant;
+const createRestaurant = async (restaurantData, imageFile) => {
+  try {
+    const restaurant = await restaurantRepository.createRestaurant(restaurantData, imageFile);
+    return restaurant;
+  } catch (error) {
+    throw error; 
+  }
 };
-
 // Get restaurant by ID, including menu and reviews
 const getRestaurantById = async (restaurantId) => {
   const { restaurant, menu, reviews } = await restaurantRepository.getRestaurantById(restaurantId);
