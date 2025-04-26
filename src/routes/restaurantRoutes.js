@@ -4,6 +4,7 @@ const restaurantController = require('../controllers/restaurantController');
 const authMiddleware = require('../middleware/authMiddleware');
 const router = express.Router();
 
+router.get('/:id', authMiddleware, restaurantController.getAllRestaurants);
 router.post('/:restaurantId/menu', authMiddleware, restaurantController.createMenu);  
 router.get('/menu', authMiddleware, restaurantController.getMenuAvailability);
 router.post('/', authMiddleware, restaurantController.createRestaurant);

@@ -1,6 +1,7 @@
 // restaurant-service/src/index.js
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 require('dotenv').config();
 const restaurantRoutes = require('./routes/restaurantRoutes');
 const authMiddleware = require('./middleware/authMiddleware');
@@ -10,6 +11,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json()); // Middleware to parse JSON bodies
 
+app.use(cors())
 // Use restaurant routes
 app.use('/api/restaurants', restaurantRoutes);
 

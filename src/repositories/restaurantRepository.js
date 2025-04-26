@@ -44,11 +44,17 @@ const getMenu = async (restaurantId) => {
   return menu;
 };
 
+// Get all restaurants by owner ID
+const getRestaurantsByOwner = async (ownerId) => {
+  return await Restaurant.find({ owner: ownerId });
+};
+
 module.exports = {
   createRestaurant,
   getRestaurantById,
   updateMenu,
   addReview,
   createMenu,
-  getMenu, 
+  getMenu,
+  getRestaurantsByOwner,
 };

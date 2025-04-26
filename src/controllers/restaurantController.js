@@ -14,6 +14,22 @@ const createRestaurant = async (req, res) => {
 };
 
 /**
+ * Get all restaurants (with owner, menu, and reviews).
+ * Expects a query parameter: userId.
+ */
+
+const getAllRestaurants = async (req, res) => {
+  try {
+    const ownerId = req.params.id;
+    const restaurants = await restaurantService.getAllRestaurantsByOwner(ownerId);
+    res.status(200).json(restaurants);
+  } catch (error) {
+    console.error('Error fetching restaurants:', error);
+    res.status(500).json({ message: 'Failed to fetch restaurants' });
+  }
+};
+
+/**
  * Get a restaurant by its ID (with owner, menu, and reviews).
  */
 const getRestaurantById = async (req, res) => {
@@ -99,5 +115,6 @@ module.exports = {
   getMenuAvailability,
   updateMenu,
   addReview,
-  createMenu 
+  createMenu,
+  getAllRestaurants,
 };
