@@ -47,24 +47,13 @@ const getRestaurantById = async (req, res) => {
   }
 };
 
-/**
- * Get menu availability for a restaurant.
- * Expects a query parameter: restaurantId.
- */
-const getMenuAvailability = async (req, res) => {
+// Menu operations
+const getMenu = async (req, res) => {
   try {
-    const { restaurantId } = req.query;
-    if (!restaurantId) {
-      console.log('Error: restaurantId query parameter is missing');
-      return res.status(400).json({ message: 'restaurantId query parameter is required' });
-    }
-
-    console.log('Received restaurantId:', restaurantId); // Log the restaurantId
-    
+    const { restaurantId } = req.params;
     const menu = await restaurantService.getMenu(restaurantId);
-    res.status(200).json({ menu });
+    res.status(200).json(menu);
   } catch (error) {
-    console.error('Error checking menu availability:', error.message);
     res.status(400).json({ message: error.message });
   }
 };
@@ -72,28 +61,45 @@ const getMenuAvailability = async (req, res) => {
 const createMenu = async (req, res) => {
   try {
     const { restaurantId } = req.params;
-    const { menuItems } = req.body;  // Expecting menuItems to be an array of objects
-    const newMenu = await restaurantService.createMenu(restaurantId, menuItems);
-    res.status(201).json({ message: 'Menu created successfully', newMenu });
+    const menuItem = req.body;
+    const newMenuItem = await restaurantService.createMenuItem(restaurantId, menuItem);
+    res.status(201).json(newMenuItem);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
-/**
- * Update the restaurant's menu.
- */
-const updateMenu = async (req, res) => {
+const updateMenuItem = async (req, res) => {
   try {
-    const { restaurantId } = req.params;
-    const { menu } = req.body;
-    const updatedMenu = await restaurantService.updateMenu(restaurantId, menu);
-    res.status(200).json({ message: 'Menu updated successfully', updatedMenu });
+    const { restaurantId, menuItemId } = req.params;
+    const updates = req.body;
+    const updatedItem = await restaurantService.updateMenuItem(restaurantId, menuItemId, updates);
+    res.status(200).json(updatedItem);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
+const deleteMenuItem = async (req, res) => {
+  try {
+    const { restaurantId, menuItemId } = req.params;
+    await restaurantService.deleteMenuItem(restaurantId, menuItemId);
+    res.status(200).json({ message: 'Menu item deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const toggleMenuItemAvailability = async (req, res) => {
+  try {
+    const { restaurantId, menuItemId } = req.params;
+    const { available } = req.body;
+    const updatedItem = await restaurantService.toggleMenuItemAvailability(restaurantId, menuItemId, available);
+    res.status(200).json(updatedItem);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 /**
  * Add a review to the restaurant.
  */
@@ -112,9 +118,11 @@ const addReview = async (req, res) => {
 module.exports = {
   createRestaurant,
   getRestaurantById,
-  getMenuAvailability,
-  updateMenu,
   addReview,
-  createMenu,
   getAllRestaurants,
+  getMenu,
+  createMenu,
+  updateMenuItem,
+  deleteMenuItem,
+  toggleMenuItemAvailability
 };

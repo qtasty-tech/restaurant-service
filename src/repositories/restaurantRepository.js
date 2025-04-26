@@ -32,10 +32,20 @@ const addReview = async (restaurantId, reviewData) => {
   return review;
 };
 
-// Create menu for a restaurant
-const createMenu = async (restaurantId, menuItems) => {
-  const menu = await Menu.insertMany(menuItems.map(item => ({ ...item, restaurant: restaurantId })));
-  return menu;
+// Menu operations
+const createMenuItem = async (restaurantId, menuItem) => {
+  const newItem = new Menu({ ...menuItem, restaurant: restaurantId });
+  await newItem.save();
+  return newItem;
+};
+
+const updateMenuItem = async (menuItemId, updates) => {
+  const updatedItem = await Menu.findByIdAndUpdate(menuItemId, updates, { new: true });
+  return updatedItem;
+};
+
+const deleteMenuItem = async (menuItemId) => {
+  await Menu.findByIdAndDelete(menuItemId);
 };
 
 // Get menu for a restaurant by ID
@@ -54,7 +64,9 @@ module.exports = {
   getRestaurantById,
   updateMenu,
   addReview,
-  createMenu,
   getMenu,
+  createMenuItem,
+  updateMenuItem,
+  deleteMenuItem,
   getRestaurantsByOwner,
 };

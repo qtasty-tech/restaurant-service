@@ -13,25 +13,13 @@ const getRestaurantById = async (restaurantId) => {
   return { restaurant, menu, reviews };
 };
 
-// Update the restaurant menu
-const updateMenu = async (restaurantId, menu) => {
-  const updatedMenu = await restaurantRepository.updateMenu(restaurantId, menu);
-  return updatedMenu;
-};
-
 // Add a review to a restaurant
 const addReview = async (restaurantId, reviewData) => {
   const review = await restaurantRepository.addReview(restaurantId, reviewData);
   return review;
 };
 
-// Create menu for a restaurant
-const createMenu = async (restaurantId, menuItems) => {
-  const newMenu = await restaurantRepository.createMenu(restaurantId, menuItems);
-  return newMenu;
-};
-
-// Get menu for a restaurant by ID
+// Menu operations
 const getMenu = async (restaurantId) => {
   try {
     // Fetch menu items related to the restaurant
@@ -43,6 +31,26 @@ const getMenu = async (restaurantId) => {
   }
 };
 
+const createMenuItem = async (restaurantId, menuItem) => {
+  const newItem = await restaurantRepository.createMenuItem(restaurantId, menuItem);
+  return newItem;
+};
+
+const updateMenuItem = async (restaurantId, menuItemId, updates) => {
+  const updatedItem = await restaurantRepository.updateMenuItem(menuItemId, updates);
+  return updatedItem;
+};
+
+const deleteMenuItem = async (restaurantId, menuItemId) => {
+  await restaurantRepository.deleteMenuItem(menuItemId);
+};
+
+const toggleMenuItemAvailability = async (restaurantId, menuItemId, available) => {
+  const updatedItem = await restaurantRepository.updateMenuItem(menuItemId, { available });
+  return updatedItem;
+};
+
+
 // Get all restaurants by owner ID
 const getAllRestaurantsByOwner = async (ownerId) => {
   return await restaurantRepository.getRestaurantsByOwner(ownerId);
@@ -51,9 +59,11 @@ const getAllRestaurantsByOwner = async (ownerId) => {
 module.exports = {
   createRestaurant,
   getRestaurantById,
-  updateMenu,
   addReview,
-  createMenu,
   getMenu, 
+  createMenuItem,
+  updateMenuItem,
+  deleteMenuItem,
+  toggleMenuItemAvailability,
   getAllRestaurantsByOwner,
 };

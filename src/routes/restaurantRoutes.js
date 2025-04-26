@@ -5,11 +5,18 @@ const authMiddleware = require('../middleware/authMiddleware');
 const router = express.Router();
 
 router.get('/:id', authMiddleware, restaurantController.getAllRestaurants);
-router.post('/:restaurantId/menu', authMiddleware, restaurantController.createMenu);  
-router.get('/menu', authMiddleware, restaurantController.getMenuAvailability);
 router.post('/', authMiddleware, restaurantController.createRestaurant);
 router.get('/:restaurantId', authMiddleware, restaurantController.getRestaurantById);
-router.put('/:restaurantId/menu', authMiddleware, restaurantController.updateMenu);
 router.post('/:restaurantId/review', authMiddleware, restaurantController.addReview);
+
+
+// Menu operations
+router.get('/:restaurantId/menu', authMiddleware, restaurantController.getMenu);
+router.post('/:restaurantId/menu', authMiddleware, restaurantController.createMenu);
+router.put('/:restaurantId/menu/:menuItemId', authMiddleware, restaurantController.updateMenuItem);
+router.delete('/:restaurantId/menu/:menuItemId', authMiddleware, restaurantController.deleteMenuItem);
+router.patch('/:restaurantId/menu/:menuItemId/availability', authMiddleware, restaurantController.toggleMenuItemAvailability);
+
+
 
 module.exports = router;
