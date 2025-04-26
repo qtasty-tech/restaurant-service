@@ -22,9 +22,8 @@ const addReview = async (restaurantId, reviewData) => {
 // Menu operations
 const getMenu = async (restaurantId) => {
   try {
-    // Fetch menu items related to the restaurant
     const menu = await restaurantRepository.getMenu(restaurantId);
-    return menu; // Return the menu items
+    return menu; 
   } catch (error) {
     console.error('Error fetching menu:', error.message);
     throw new Error('Menu not found');
