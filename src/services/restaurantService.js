@@ -10,6 +10,17 @@ const createRestaurant = async (restaurantData, imageFile) => {
     throw error; 
   }
 };
+//get all restaurants for customer
+const getAllRestaurantsForCustomer = async (category = null) => {
+  try {
+    const restaurants = await restaurantRepository.getAllRestaurantsForCustomer(category);
+    return restaurants;
+  } catch (error) {
+    console.error('Error fetching restaurants:', error.message);
+    throw new Error('Failed to fetch restaurants');
+  }
+};
+
 // Get restaurant by ID, including menu and reviews
 const getRestaurantById = async (restaurantId) => {
   const { restaurant, menu, reviews } = await restaurantRepository.getRestaurantById(restaurantId);
@@ -67,5 +78,6 @@ module.exports = {
   updateMenuItem,
   deleteMenuItem,
   toggleMenuItemAvailability,
+  getAllRestaurantsForCustomer,
   getAllRestaurantsByOwner,
 };

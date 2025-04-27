@@ -30,6 +30,18 @@ const getAllRestaurants = async (req, res) => {
   }
 };
 
+//get all restaurants for customer
+const getAllRestaurantsForCustomer = async (req, res) => {
+  try {
+    const category = req.query.category || null; 
+    const restaurants = await restaurantService.getAllRestaurantsForCustomer(category);
+    res.status(200).json(restaurants);
+  } catch (error) {
+    console.error('Error fetching restaurants:', error);
+    res.status(500).json({ message: 'Failed to fetch restaurants' });
+  }
+};
+
 /**
  * Get a restaurant by its ID (with owner, menu, and reviews).
  */
@@ -125,5 +137,6 @@ module.exports = {
   createMenu,
   updateMenuItem,
   deleteMenuItem,
+  getAllRestaurantsForCustomer,
   toggleMenuItemAvailability
 };

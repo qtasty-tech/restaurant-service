@@ -10,6 +10,8 @@ router.post('/', authMiddleware, upload.single('image'), restaurantController.cr
 router.get('/:restaurantId', authMiddleware, restaurantController.getRestaurantById);
 router.post('/:restaurantId/review', authMiddleware, restaurantController.addReview);
 
+//get all restaurent for customer
+router.get('/', authMiddleware, restaurantController.getAllRestaurantsForCustomer); 
 
 // Menu operations
 router.get('/:restaurantId/menu', authMiddleware, restaurantController.getMenu);

@@ -30,6 +30,17 @@ const createRestaurant = async (restaurantData, imageFile) => {
     throw error;
   }
 };
+//get all restaurants for customer
+const getAllRestaurantsForCustomer = async (category = null) => {
+  const query = { isVerified: true };
+
+  if (category && category !== 'all') {
+    query.category = { $in: [category] };
+  }
+
+  const restaurants = await Restaurant.find(query);
+  return restaurants;
+};
 
 // Get restaurant by ID, including menu and reviews
 const getRestaurantById = async (restaurantId) => {
@@ -93,5 +104,6 @@ module.exports = {
   createMenuItem,
   updateMenuItem,
   deleteMenuItem,
+  getAllRestaurantsForCustomer,
   getRestaurantsByOwner,
 };
