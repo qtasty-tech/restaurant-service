@@ -8,6 +8,8 @@ const MenuSchema = new mongoose.Schema({
   image: { type: String },
   category: { type: String, required: true }, 
   available: { type: Boolean, default: true }, 
+  popular: { type: Boolean, default: false }, // New field
+  calories: String ,
   createdAt: { type: Date, default: Date.now },
 });
 

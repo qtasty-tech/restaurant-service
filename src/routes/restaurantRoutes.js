@@ -6,7 +6,7 @@ const router = express.Router();
 const upload = require('../config/multer');
 
 router.get('/:id', authMiddleware, restaurantController.getAllRestaurants);
-router.post('/', authMiddleware, upload.single('image'), restaurantController.createRestaurant);
+router.post('/',authMiddleware, restaurantController.createRestaurant);
 router.get('/:restaurantId', authMiddleware, restaurantController.getRestaurantById);
 router.post('/:restaurantId/review', authMiddleware, restaurantController.addReview);
 
@@ -14,8 +14,8 @@ router.post('/:restaurantId/review', authMiddleware, restaurantController.addRev
 router.get('/', authMiddleware, restaurantController.getAllRestaurantsForCustomer); 
 
 // Menu operations
-router.get('/:restaurantId/menu', authMiddleware, restaurantController.getMenu);
-router.post('/:restaurantId/menu', authMiddleware, restaurantController.createMenu);
+router.get('/:restaurantId/menu', restaurantController.getMenu);
+router.post('/:restaurantId/menu', restaurantController.createMenu);
 router.put('/:restaurantId/menu/:menuItemId', authMiddleware, restaurantController.updateMenuItem);
 router.delete('/:restaurantId/menu/:menuItemId', authMiddleware, restaurantController.deleteMenuItem);
 router.patch('/:restaurantId/menu/:menuItemId/availability', authMiddleware, restaurantController.toggleMenuItemAvailability);
