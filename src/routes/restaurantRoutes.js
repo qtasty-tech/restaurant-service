@@ -5,13 +5,11 @@ const authMiddleware = require('../middleware/authMiddleware');
 const router = express.Router();
 const upload = require('../config/multer');
 
+//restaurent owner
 router.get('/:id', authMiddleware, restaurantController.getAllRestaurants);
 router.post('/',authMiddleware, restaurantController.createRestaurant);
-router.get('/:restaurantId', authMiddleware, restaurantController.getRestaurantById);
+router.get('/:restaurantId',restaurantController.getRestaurantById);
 router.post('/:restaurantId/review', authMiddleware, restaurantController.addReview);
-
-//get all restaurent for customer
-router.get('/', authMiddleware, restaurantController.getAllRestaurantsForCustomer); 
 
 // Menu operations
 router.get('/:restaurantId/menu', restaurantController.getMenu);
@@ -20,6 +18,9 @@ router.put('/:restaurantId/menu/:menuItemId', authMiddleware, restaurantControll
 router.delete('/:restaurantId/menu/:menuItemId', authMiddleware, restaurantController.deleteMenuItem);
 router.patch('/:restaurantId/menu/:menuItemId/availability', authMiddleware, restaurantController.toggleMenuItemAvailability);
 
+//get all restaurent for customer
+router.get('/', authMiddleware, restaurantController.getAllRestaurantsForCustomer);
+router.get('/customer/:restaurantId', restaurantController.getRestaurantDetails);
 
 
 module.exports = router;

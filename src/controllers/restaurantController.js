@@ -1,7 +1,7 @@
 const restaurantService = require('../services/restaurantService');
 const Restaurant = require('../models/Restaurant');
 const Menu = require('../models/Menu');
-
+const Review = require('../models/Review');
 /**
  * Create a new restaurant.
  */
@@ -88,26 +88,8 @@ const getAllRestaurantsForCustomer = async (req, res) => {
   }
 };
 
-/**
- * Get a restaurant by its ID (with owner, menu, and reviews).
- */
-const getRestaurantById = async (req, res) => {
-  try {
-    const { restaurantId } = req.params;
-    const restaurant = await restaurantService.getRestaurantById(restaurantId);
-
-    if (!restaurant.isVerified) {
-      return res.status(400).json({ message: 'Restaurant is not verified yet.' });
-    }
-
-    res.status(200).json(restaurant);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-// Menu operations
-const getMenu = async (req, res) => {
+// controllers/restaurantController.js
+const getRestaurantDetails = async (req, res) => {
   try {
     const { restaurantId } = req.params;
 
@@ -168,7 +150,72 @@ const getMenu = async (req, res) => {
   }
 };
 
+/**
+ * Get a restaurant by its ID (with owner, menu, and reviews).
+ */
+const getRestaurantById = async (req, res) => {
+  try {
+    const { restaurantId } = req.params;
+    const restaurant = await restaurantService.getRestaurantById(restaurantId);
+
+    if (!restaurant.isVerified) {
+      return res.status(400).json({ message: 'Restaurant is not verified yet.' });
+    }
+
+    res.status(200).json(restaurant);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Menu operations
+const getMenu = async (req, res) => {
+  try {
+    const { restaurantId } = req.params;
+
+    const menuItems = await Menu.find({ restaurant: restaurantId })
+      .sort('category')
+      .lean();
+
+    // Group items by category
+    const categoriesMap = new Map();
+    let categoryCounter = 1;
+
+    menuItems.forEach(item => {
+      if (!categoriesMap.has(item.category)) {
+        categoriesMap.set(item.category, {
+          id: categoryCounter++,
+          name: item.category,
+          items: []
+        });
+      }
+      
+      categoriesMap.get(item.category).items.push({
+        id: item._id.toString(),
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        popular: item.popular,
+        imageUrl: item.image,
+        calories: item.calories
+      });
+    });
+
+    res.json({
+      success: true,
+      categories: Array.from(categoriesMap.values())
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 const createMenu = async (req, res) => {
+  const { restaurantId } = req.params;
   try {
     const { restaurantId } = req.params;
     const { 
@@ -191,8 +238,7 @@ const createMenu = async (req, res) => {
 
     // Verify restaurant exists and owner is current user
     const restaurant = await Restaurant.findOne({
-      _id: restaurantId,
-      owner: req.user._id
+      _id: restaurantId
     });
 
     if (!restaurant) {
@@ -234,12 +280,54 @@ const createMenu = async (req, res) => {
 
 const updateMenuItem = async (req, res) => {
   try {
-    const { restaurantId, menuItemId } = req.params;
+    const { itemId } = req.params;
     const updates = req.body;
-    const updatedItem = await restaurantService.updateMenuItem(restaurantId, menuItemId, updates);
-    res.status(200).json(updatedItem);
+
+    // Find menu item and verify ownership
+    const menuItem = await Menu.findById(itemId)
+      .populate('restaurant')
+      .lean();
+
+    if (!menuItem) {
+      return res.status(404).json({
+        success: false,
+        message: 'Menu item not found'
+      });
+    }
+
+    const restaurant = await Restaurant.findOne({
+      _id: menuItem.restaurant._id,
+      owner: req.user._id
+    });
+
+    if (!restaurant) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized to update this item'
+      });
+    }
+
+    // Prevent changing restaurant ID
+    if (updates.restaurant) {
+      delete updates.restaurant;
+    }
+
+    const updatedItem = await Menu.findByIdAndUpdate(
+      itemId,
+      updates,
+      { new: true, runValidators: true }
+    );
+
+    res.json({
+      success: true,
+      menuItem: updatedItem
+    });
+
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
 
@@ -288,5 +376,6 @@ module.exports = {
   updateMenuItem,
   deleteMenuItem,
   getAllRestaurantsForCustomer,
+  getRestaurantDetails,
   toggleMenuItemAvailability
 };
