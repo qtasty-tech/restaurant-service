@@ -1,7 +1,7 @@
-const restaurantService = require('../services/restaurantService');
-const Restaurant = require('../models/Restaurant');
-const Menu = require('../models/Menu');
-const Review = require('../models/Review');
+const restaurantService = require("../services/restaurantService");
+const Restaurant = require("../models/Restaurant");
+const Menu = require("../models/Menu");
+const Review = require("../models/Review");
 /**
  * Create a new restaurant.
  */
@@ -18,14 +18,14 @@ const createRestaurant = async (req, res) => {
       deliveryFee,
       tags,
       coverImage,
-      image
+      image,
     } = req.body;
 
     // Validate required fields
     if (!name || !cuisine || !address || !image || !coverImage) {
       return res.status(400).json({
         success: false,
-        message: 'Name, cuisine, address, image, and cover image are required'
+        message: "Name, cuisine, address, image, and cover image are required",
       });
     }
 
@@ -35,13 +35,13 @@ const createRestaurant = async (req, res) => {
       owner,
       cuisine,
       address,
-      description: description || '',
-      hours: hours || 'Monday - Sunday: 11:00 AM - 10:00 PM',
+      description: description || "",
+      hours: hours || "Monday - Sunday: 11:00 AM - 10:00 PM",
       deliveryTime: deliveryTime || 30,
       deliveryFee: deliveryFee || 0,
-      tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
+      tags: tags ? tags.split(",").map((tag) => tag.trim()) : [],
       image, // Direct URL string
-      coverImageUrl: coverImage // Direct URL string
+      coverImageUrl: coverImage, // Direct URL string
     };
 
     // Save to database
@@ -49,13 +49,12 @@ const createRestaurant = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      restaurant
+      restaurant,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -68,23 +67,27 @@ const createRestaurant = async (req, res) => {
 const getAllRestaurants = async (req, res) => {
   try {
     const ownerId = req.params.id;
-    const restaurants = await restaurantService.getAllRestaurantsByOwner(ownerId);
+    const restaurants = await restaurantService.getAllRestaurantsByOwner(
+      ownerId
+    );
     res.status(200).json(restaurants);
   } catch (error) {
-    console.error('Error fetching restaurants:', error);
-    res.status(500).json({ message: 'Failed to fetch restaurants' });
+    console.error("Error fetching restaurants:", error);
+    res.status(500).json({ message: "Failed to fetch restaurants" });
   }
 };
 
 //get all restaurants for customer
 const getAllRestaurantsForCustomer = async (req, res) => {
   try {
-    const category = req.query.category || null; 
-    const restaurants = await restaurantService.getAllRestaurantsForCustomer(category);
+    const category = req.query.category || null;
+    const restaurants = await restaurantService.getAllRestaurantsForCustomer(
+      category
+    );
     res.status(200).json(restaurants);
   } catch (error) {
-    console.error('Error fetching restaurants:', error);
-    res.status(500).json({ message: 'Failed to fetch restaurants' });
+    console.error("Error fetching restaurants:", error);
+    res.status(500).json({ message: "Failed to fetch restaurants" });
   }
 };
 
@@ -95,24 +98,26 @@ const getRestaurantDetails = async (req, res) => {
 
     // Get Restaurant
     const restaurant = await Restaurant.findById(restaurantId).lean();
-    if (!restaurant) return res.status(404).json({ message: "Restaurant not found" });
+    if (!restaurant)
+      return res.status(404).json({ message: "Restaurant not found" });
 
     // Calculate Rating & Reviews
     const reviews = await Review.find({ restaurant: restaurantId });
     const reviewsCount = reviews.length;
-    const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviewsCount || 0;
+    const avgRating =
+      reviews.reduce((sum, r) => sum + r.rating, 0) / reviewsCount || 0;
 
     // Get Grouped Menu Items
     const menuItems = await Menu.find({ restaurant: restaurantId }).lean();
     const categoriesMap = new Map();
     let categoryId = 1;
 
-    menuItems.forEach(item => {
+    menuItems.forEach((item) => {
       if (!categoriesMap.has(item.category)) {
         categoriesMap.set(item.category, {
           id: categoryId++,
           name: item.category,
-          items: []
+          items: [],
         });
       }
       categoriesMap.get(item.category).items.push({
@@ -122,7 +127,7 @@ const getRestaurantDetails = async (req, res) => {
         price: item.price,
         popular: item.popular,
         imageUrl: item.image,
-        calories: item.calories
+        calories: item.calories,
       });
     });
 
@@ -141,7 +146,7 @@ const getRestaurantDetails = async (req, res) => {
       coverImageUrl: restaurant.coverImageUrl,
       description: restaurant.description,
       hours: restaurant.hours,
-      categories: Array.from(categoriesMap.values())
+      categories: Array.from(categoriesMap.values()),
     };
 
     res.json(response);
@@ -159,7 +164,9 @@ const getRestaurantById = async (req, res) => {
     const restaurant = await restaurantService.getRestaurantById(restaurantId);
 
     if (!restaurant.isVerified) {
-      return res.status(400).json({ message: 'Restaurant is not verified yet.' });
+      return res
+        .status(400)
+        .json({ message: "Restaurant is not verified yet." });
     }
 
     res.status(200).json(restaurant);
@@ -174,22 +181,22 @@ const getMenu = async (req, res) => {
     const { restaurantId } = req.params;
 
     const menuItems = await Menu.find({ restaurant: restaurantId })
-      .sort('category')
+      .sort("category")
       .lean();
 
     // Group items by category
     const categoriesMap = new Map();
     let categoryCounter = 1;
 
-    menuItems.forEach(item => {
+    menuItems.forEach((item) => {
       if (!categoriesMap.has(item.category)) {
         categoriesMap.set(item.category, {
           id: categoryCounter++,
           name: item.category,
-          items: []
+          items: [],
         });
       }
-      
+
       categoriesMap.get(item.category).items.push({
         id: item._id.toString(),
         name: item.name,
@@ -197,54 +204,54 @@ const getMenu = async (req, res) => {
         price: item.price,
         popular: item.popular,
         imageUrl: item.image,
-        calories: item.calories
+        calories: item.calories,
+        available: item.available,
       });
     });
 
     res.json({
       success: true,
-      categories: Array.from(categoriesMap.values())
+      categories: Array.from(categoriesMap.values()),
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
 
 const createMenu = async (req, res) => {
-  const { restaurantId } = req.params;
   try {
     const { restaurantId } = req.params;
-    const { 
-      name, 
-      description, 
-      price, 
-      category, 
-      image, 
-      calories, 
-      popular 
+    const {
+      name,
+      description,
+      price,
+      category,
+      image,
+      calories,
+      popular,
+      available,
     } = req.body;
 
     // Validate required fields
     if (!name || !price || !category) {
       return res.status(400).json({
         success: false,
-        message: 'Name, price, and category are required fields'
+        message: "Name, price, and category are required fields",
       });
     }
 
     // Verify restaurant exists and owner is current user
     const restaurant = await Restaurant.findOne({
-      _id: restaurantId
+      _id: restaurantId,
     });
 
     if (!restaurant) {
       return res.status(404).json({
         success: false,
-        message: 'Restaurant not found or unauthorized'
+        message: "Restaurant not found or unauthorized",
       });
     }
 
@@ -252,12 +259,13 @@ const createMenu = async (req, res) => {
     const newMenuItem = new Menu({
       restaurant: restaurantId,
       name,
-      description: description || '',
+      description: description || "",
       price,
       category,
-      image: image || '',
-      calories: calories || '0',
-      popular: popular || false
+      image: image || "",
+      calories: calories || "0",
+      popular: popular || false,
+      available: available || true,
     });
 
     const savedItem = await newMenuItem.save();
@@ -266,44 +274,43 @@ const createMenu = async (req, res) => {
       success: true,
       menuItem: {
         id: savedItem._id,
-        ...savedItem.toObject()
-      }
+        ...savedItem.toObject(),
+      },
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
 
 const updateMenuItem = async (req, res) => {
   try {
-    const { itemId } = req.params;
+    const { restaurantId, menuItemId } = req.params;
     const updates = req.body;
 
     // Find menu item and verify ownership
-    const menuItem = await Menu.findById(itemId)
-      .populate('restaurant')
+    const menuItem = await Menu.findById(menuItemId)
+      .populate("restaurant")
       .lean();
 
     if (!menuItem) {
       return res.status(404).json({
         success: false,
-        message: 'Menu item not found'
+        message: "Menu item not found",
       });
     }
 
     const restaurant = await Restaurant.findOne({
-      _id: menuItem.restaurant._id,
-      owner: req.user._id
+      _id: restaurantId,
+      // owner: req.user._id
     });
 
     if (!restaurant) {
       return res.status(403).json({
         success: false,
-        message: 'Unauthorized to update this item'
+        message: "Unauthorized to update this item",
       });
     }
 
@@ -312,21 +319,19 @@ const updateMenuItem = async (req, res) => {
       delete updates.restaurant;
     }
 
-    const updatedItem = await Menu.findByIdAndUpdate(
-      itemId,
-      updates,
-      { new: true, runValidators: true }
-    );
+    const updatedItem = await Menu.findByIdAndUpdate(menuItemId, updates, {
+      new: true,
+      runValidators: true,
+    });
 
     res.json({
       success: true,
-      menuItem: updatedItem
+      menuItem: updatedItem,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -335,7 +340,7 @@ const deleteMenuItem = async (req, res) => {
   try {
     const { restaurantId, menuItemId } = req.params;
     await restaurantService.deleteMenuItem(restaurantId, menuItemId);
-    res.status(200).json({ message: 'Menu item deleted successfully' });
+    res.status(200).json({ message: "Menu item deleted successfully" });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -345,10 +350,85 @@ const toggleMenuItemAvailability = async (req, res) => {
   try {
     const { restaurantId, menuItemId } = req.params;
     const { available } = req.body;
-    const updatedItem = await restaurantService.toggleMenuItemAvailability(restaurantId, menuItemId, available);
-    res.status(200).json(updatedItem);
+
+    // Verify ownership
+    const restaurant = await Restaurant.findOne({
+      _id: restaurantId,
+      // owner: req.user._id
+    });
+
+    if (!restaurant) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized to update this item",
+      });
+    }
+
+    const updatedItem = await Menu.findByIdAndUpdate(
+      menuItemId,
+      { available },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedItem) {
+      return res.status(404).json({
+        success: false,
+        message: "Menu item not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      menuItem: updatedItem,
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const toggleMenuItemPopularity = async (req, res) => {
+  try {
+    const { restaurantId, menuItemId } = req.params;
+    const { popular } = req.body;
+
+    // Verify ownership
+    const restaurant = await Restaurant.findOne({
+      _id: restaurantId,
+      // owner: req.user._id
+    });
+
+    if (!restaurant) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized to update this item",
+      });
+    }
+
+    const updatedItem = await Menu.findByIdAndUpdate(
+      menuItemId,
+      { popular },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedItem) {
+      return res.status(404).json({
+        success: false,
+        message: "Menu item not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      menuItem: updatedItem,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 /**
@@ -360,7 +440,7 @@ const addReview = async (req, res) => {
     const { userId, rating, comment } = req.body;
     const reviewData = { user: userId, rating, comment };
     const review = await restaurantService.addReview(restaurantId, reviewData);
-    res.status(200).json({ message: 'Review added successfully', review });
+    res.status(200).json({ message: "Review added successfully", review });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -377,5 +457,6 @@ module.exports = {
   deleteMenuItem,
   getAllRestaurantsForCustomer,
   getRestaurantDetails,
-  toggleMenuItemAvailability
+  toggleMenuItemAvailability,
+  toggleMenuItemPopularity,
 };

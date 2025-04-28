@@ -17,6 +17,7 @@ router.post('/:restaurantId/menu', restaurantController.createMenu);
 router.put('/:restaurantId/menu/:menuItemId', authMiddleware, restaurantController.updateMenuItem);
 router.delete('/:restaurantId/menu/:menuItemId', authMiddleware, restaurantController.deleteMenuItem);
 router.patch('/:restaurantId/menu/:menuItemId/availability', authMiddleware, restaurantController.toggleMenuItemAvailability);
+router.patch('/:restaurantId/menu/:menuItemId/popularity', authMiddleware, restaurantController.toggleMenuItemPopularity);
 
 //get all restaurent for customer
 router.get('/', authMiddleware, restaurantController.getAllRestaurantsForCustomer);
