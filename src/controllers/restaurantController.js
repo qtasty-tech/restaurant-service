@@ -161,15 +161,28 @@ const getRestaurantDetails = async (req, res) => {
 const getRestaurantById = async (req, res) => {
   try {
     const { restaurantId } = req.params;
-    const restaurant = await restaurantService.getRestaurantById(restaurantId);
+    const { restaurant, menu, reviews } = await restaurantService.getRestaurantById(restaurantId);
 
     if (!restaurant.isVerified) {
-      return res
-        .status(400)
-        .json({ message: "Restaurant is not verified yet." });
+      return res.status(400).json({ message: "Restaurant is not verified yet." });
     }
 
-    res.status(200).json(restaurant);
+    res.status(200).json({
+      _id: restaurant._id,
+      name: restaurant.name,
+      cuisine: restaurant.cuisine,
+      address: restaurant.address,
+      description: restaurant.description,
+      hours: restaurant.hours,
+      deliveryTime: restaurant.deliveryTime,
+      deliveryFee: restaurant.deliveryFee,
+      tags: restaurant.tags,
+      image: restaurant.image,
+      coverImageUrl: restaurant.coverImageUrl,
+      isVerified: restaurant.isVerified,
+      menu,
+      reviews,
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
