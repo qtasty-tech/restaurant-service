@@ -20,7 +20,7 @@ router.patch('/:restaurantId/menu/:menuItemId/availability', authMiddleware, res
 router.patch('/:restaurantId/menu/:menuItemId/popularity', authMiddleware, restaurantController.toggleMenuItemPopularity);
 
 //get all restaurent for customer
-router.get('/', authMiddleware, restaurantController.getAllRestaurantsForCustomer);
+router.get('/',restaurantController.getAllRestaurantsForCustomer);
 router.get('/customer/:restaurantId', restaurantController.getRestaurantDetails);
 
 
