@@ -8,7 +8,7 @@ const upload = require('../config/multer');
 //restaurent owner
 router.get('/:id', authMiddleware, restaurantController.getAllRestaurants);
 router.post('/',authMiddleware, restaurantController.createRestaurant);
-router.get('/:restaurantId',restaurantController.getRestaurantById);
+router.get('/:restaurantId',authMiddleware,restaurantController.getRestaurantById);//For owner
 router.post('/:restaurantId/review', authMiddleware, restaurantController.addReview);
 
 // Menu operations
@@ -21,7 +21,7 @@ router.patch('/:restaurantId/menu/:menuItemId/popularity', authMiddleware, resta
 
 //get all restaurent for customer
 router.get('/',restaurantController.getAllRestaurantsForCustomer);
-router.get('/customer/:restaurantId', restaurantController.getRestaurantDetails);
+router.get('/by-id/:restaurantId', restaurantController.getRestaurantDetails);
 
 
 module.exports = router;
