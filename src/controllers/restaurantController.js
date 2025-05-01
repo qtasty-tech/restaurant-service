@@ -2,9 +2,12 @@ const restaurantService = require("../services/restaurantService");
 const Restaurant = require("../models/Restaurant");
 const Menu = require("../models/Menu");
 const Review = require("../models/Review");
+const axios = require('axios');
 /**
  * Create a new restaurant.
  */
+
+
 const createRestaurant = async (req, res) => {
   try {
     const {
@@ -19,6 +22,8 @@ const createRestaurant = async (req, res) => {
       tags,
       coverImage,
       image,
+      phone,
+      location, 
     } = req.body;
 
     // Validate required fields
@@ -40,11 +45,13 @@ const createRestaurant = async (req, res) => {
       deliveryTime: deliveryTime || 30,
       deliveryFee: deliveryFee || 0,
       tags: tags ? tags.split(",").map((tag) => tag.trim()) : [],
-      image, // Direct URL string
-      coverImageUrl: coverImage, // Direct URL string
+      image, 
+      coverImageUrl: coverImage, 
+      phone, 
+      location, 
     };
 
-    // Save to database
+    
     const restaurant = await Restaurant.create(restaurantData);
 
     res.status(201).json({

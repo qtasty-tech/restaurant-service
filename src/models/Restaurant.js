@@ -6,7 +6,7 @@ const RestaurantSchema = new mongoose.Schema({
   address: { type: String, required: true },
   cuisine: { type: String, required: true },
   rating: { type: Number, default: 0 },
-  image: { type: String, required: true }, // Now stores URL directly
+  image: { type: String, required: true }, 
   coverImageUrl: { type: String, required: true },
   deliveryTime: Number,
   deliveryFee: Number,
@@ -14,7 +14,19 @@ const RestaurantSchema = new mongoose.Schema({
   description: String,
   hours: String,
   createdAt: { type: Date, default: Date.now },
-  isVerified: { type: Boolean, default: false }
+  isVerified: { type: Boolean, default: false },
+  location: {
+    type: {
+      type: String,
+      enum: ["Point"], 
+      default: "Point",
+    },
+    coordinates: {
+      type: [Number],
+      required: true,
+    },
+  },
+  phone: { type: String }, 
 });
 
 const Restaurant = mongoose.model('Restaurant', RestaurantSchema);
