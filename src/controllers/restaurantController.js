@@ -148,6 +148,8 @@ const getRestaurantDetails = async (req, res) => {
       reviews: reviewsCount,
       deliveryTime: restaurant.deliveryTime,
       deliveryFee: restaurant.deliveryFee,
+      location: restaurant.location,
+      phone: restaurant.phone,
       tags: restaurant.tags,
       imageUrl: restaurant.image.url,
       coverImageUrl: restaurant.coverImageUrl,
