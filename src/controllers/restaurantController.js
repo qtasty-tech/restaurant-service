@@ -142,6 +142,7 @@ const getRestaurantDetails = async (req, res) => {
     const response = {
       id: restaurant._id.toString(),
       name: restaurant.name,
+      image: restaurant.image,
       cuisine: restaurant.cuisine,
       address: restaurant.address,
       rating: avgRating,
@@ -172,6 +173,7 @@ const getRestaurantById = async (req, res) => {
     const { restaurantId } = req.params;
     const { restaurant, menu, reviews } = await restaurantService.getRestaurantById(restaurantId);
 
+    c
     if (!restaurant.isVerified) {
       return res.status(400).json({ message: "Restaurant is not verified yet." });
     }
