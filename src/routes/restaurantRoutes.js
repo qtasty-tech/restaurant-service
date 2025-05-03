@@ -22,6 +22,7 @@ router.patch('/:restaurantId/menu/:menuItemId/popularity', authMiddleware, resta
 //get all restaurent for customer
 router.get('/', restaurantController.getAllRestaurantsForCustomer);
 router.get('/by-id/:restaurantId', restaurantController.getRestaurantDetails);
+router.get('/:restaurantId/availableMenus', restaurantController.getAvailableMenuItems);
 
 
 module.exports = router;

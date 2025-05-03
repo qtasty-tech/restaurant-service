@@ -300,6 +300,53 @@ const getMenu = async (req, res) => {
   }
 };
 
+
+const getAvailableMenuItems = async (req, res) => {
+  try {
+    const { restaurantId } = req.params;
+
+    const menuItems = await Menu.find({ restaurant: restaurantId , available: true })
+      .sort("category")
+      .lean();
+
+    // Group items by category
+    const categoriesMap = new Map();
+    let categoryCounter = 1;
+
+    menuItems.forEach((item) => {
+      if (!categoriesMap.has(item.category)) {
+        categoriesMap.set(item.category, {
+          id: categoryCounter++,
+          name: item.category,
+          items: [],
+        });
+      }
+
+      categoriesMap.get(item.category).items.push({
+        id: item._id.toString(),
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        popular: item.popular,
+        imageUrl: item.image,
+        calories: item.calories,
+        available: item.available,
+      });
+    });
+
+    res.json({
+      success: true,
+      categories: Array.from(categoriesMap.values()),
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+
+}
+
 const createMenu = async (req, res) => {
   try {
     const { restaurantId } = req.params;
@@ -585,6 +632,7 @@ module.exports = {
   addReview,
   getAllRestaurants,
   getMenu,
+  getAvailableMenuItems,
   createMenu,
   updateMenuItem,
   deleteMenuItem,
