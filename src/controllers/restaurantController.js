@@ -1,5 +1,7 @@
 const restaurantService = require("../services/restaurantService");
 const Restaurant = require("../models/Restaurant");
+const { v2: cloudinary } = require("cloudinary");
+const fs = require("fs").promises;
 const Menu = require("../models/Menu");
 const Review = require("../models/Review");
 const axios = require("axios");
@@ -19,17 +21,53 @@ const createRestaurant = async (req, res) => {
       deliveryTime,
       deliveryFee,
       tags,
-      coverImage,
-      image,
       phone,
       location,
     } = req.body;
 
     // Validate required fields
-    if (!name || !cuisine || !address || !image || !coverImage) {
+    if (!name || !cuisine || !address || !owner || !phone) {
       return res.status(400).json({
         success: false,
-        message: "Name, cuisine, address, image, and cover image are required",
+        message: "Name, cuisine, address, owner, and phone are required",
+      });
+    }
+
+    // Handle image uploads to Cloudinary
+    let imageUrl = "";
+    let coverImageUrl = "";
+    const files = req.files;
+
+    if (
+      files &&
+      files.image &&
+      files.image.length > 0 &&
+      files.coverImage &&
+      files.coverImage.length > 0
+    ) {
+      // Process main image
+      const imageFile = files.image[0];
+      const imageResult = await cloudinary.uploader.upload(imageFile.path, {
+        folder: `restaurants/${owner}`,
+      });
+      imageUrl = imageResult.secure_url;
+      await fs.unlink(imageFile.path).catch((err) =>
+        console.error(`Failed to delete temp file ${imageFile.path}:`, err)
+      );
+
+      // Process cover image
+      const coverImageFile = files.coverImage[0];
+      const coverResult = await cloudinary.uploader.upload(coverImageFile.path, {
+        folder: `restaurants/${owner}`,
+      });
+      coverImageUrl = coverResult.secure_url;
+      await fs.unlink(coverImageFile.path).catch((err) =>
+        console.error(`Failed to delete temp file ${coverImageFile.path}:`, err)
+      );
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Main image and cover image are required",
       });
     }
 
@@ -41,13 +79,13 @@ const createRestaurant = async (req, res) => {
       address,
       description: description || "",
       hours: hours || "Monday - Sunday: 11:00 AM - 10:00 PM",
-      deliveryTime: deliveryTime || 30,
-      deliveryFee: deliveryFee || 0,
+      deliveryTime: deliveryTime ? Number(deliveryTime) : 30,
+      deliveryFee: deliveryFee ? Number(deliveryFee) : 0,
       tags: tags ? tags.split(",").map((tag) => tag.trim()) : [],
-      image,
-      coverImageUrl: coverImage,
+      image: imageUrl,
+      coverImageUrl,
       phone,
-      location,
+      location: location ? JSON.parse(location) : { type: "Point", coordinates: [0, 0] },
     };
 
     const restaurant = await Restaurant.create(restaurantData);
@@ -57,6 +95,22 @@ const createRestaurant = async (req, res) => {
       restaurant,
     });
   } catch (error) {
+    // Clean up any remaining temporary files
+    if (req.files && req.files.image) {
+      for (const file of req.files.image) {
+        await fs.unlink(file.path).catch((err) =>
+          console.error(`Failed to delete temp file ${file.path}:`, err)
+        );
+      }
+    }
+    if (req.files && req.files.coverImage) {
+      for (const file of req.files.coverImage) {
+        await fs.unlink(file.path).catch((err) =>
+          console.error(`Failed to delete temp file ${file.path}:`, err)
+        );
+      }
+    }
+    console.error("Error in createRestaurant:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -249,16 +303,8 @@ const getMenu = async (req, res) => {
 const createMenu = async (req, res) => {
   try {
     const { restaurantId } = req.params;
-    const {
-      name,
-      description,
-      price,
-      category,
-      image,
-      calories,
-      popular,
-      available,
-    } = req.body;
+    const { name, description, price, category, calories, popular, available } =
+      req.body;
 
     // Validate required fields
     if (!name || !price || !category) {
@@ -268,7 +314,7 @@ const createMenu = async (req, res) => {
       });
     }
 
-    // Verify restaurant exists and owner is current user
+    // Verify restaurant exists
     const restaurant = await Restaurant.findOne({
       _id: restaurantId,
     });
@@ -280,6 +326,30 @@ const createMenu = async (req, res) => {
       });
     }
 
+    // Handle image upload to Cloudinary
+    let imageUrl = "";
+    if (req.file) {
+      try {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: `restaurants/${restaurantId}/menu`,
+        });
+        imageUrl = result.secure_url;
+        // Clean up temporary file
+        await fs
+          .unlink(req.file.path)
+          .catch((err) => console.error("Failed to delete temp file:", err));
+      } catch (uploadError) {
+        await fs
+          .unlink(req.file.path)
+          .catch((err) => console.error("Failed to delete temp file:", err));
+        throw new Error(
+          "Failed to upload image to Cloudinary: " + uploadError.message
+        );
+      }
+    } else {
+      console.warn("No file uploaded for createMenu");
+    }
+
     // Create new menu item
     const newMenuItem = new Menu({
       restaurant: restaurantId,
@@ -287,10 +357,10 @@ const createMenu = async (req, res) => {
       description: description || "",
       price,
       category,
-      image: image || "",
+      image: imageUrl,
       calories: calories || "0",
-      popular: popular || false,
-      available: available || true,
+      popular: popular === "true" || popular === true,
+      available: available === "true" || available === true || true,
     });
 
     const savedItem = await newMenuItem.save();
@@ -303,6 +373,12 @@ const createMenu = async (req, res) => {
       },
     });
   } catch (error) {
+    if (req.file) {
+      await fs
+        .unlink(req.file.path)
+        .catch((err) => console.error("Failed to delete temp file:", err));
+    }
+    console.error("Error in createMenu:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -329,7 +405,6 @@ const updateMenuItem = async (req, res) => {
 
     const restaurant = await Restaurant.findOne({
       _id: restaurantId,
-      // owner: req.user._id
     });
 
     if (!restaurant) {
@@ -337,6 +412,26 @@ const updateMenuItem = async (req, res) => {
         success: false,
         message: "Unauthorized to update this item",
       });
+    }
+    // Handle image upload to Cloudinary
+    if (req.file) {
+      try {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: `restaurants/${restaurantId}/menu`,
+        });
+        updates.image = result.secure_url;
+        // Clean up temporary file
+        await fs
+          .unlink(req.file.path)
+          .catch((err) => console.error("Failed to delete temp file:", err));
+      } catch (uploadError) {
+        await fs
+          .unlink(req.file.path)
+          .catch((err) => console.error("Failed to delete temp file:", err));
+        throw new Error(
+          "Failed to upload image to Cloudinary: " + uploadError.message
+        );
+      }
     }
 
     // Prevent changing restaurant ID
@@ -349,11 +444,24 @@ const updateMenuItem = async (req, res) => {
       runValidators: true,
     });
 
+    if (!updatedItem) {
+      return res.status(404).json({
+        success: false,
+        message: "Failed to update menu item",
+      });
+    }
+
     res.json({
       success: true,
-      menuItem: updatedItem,
+      menuItem: updatedItem.toObject(),
     });
   } catch (error) {
+    if (req.file) {
+      await fs
+        .unlink(req.file.path)
+        .catch((err) => console.error("Failed to delete temp file:", err));
+    }
+    console.error("Error in updateMenuItem:", error);
     res.status(500).json({
       success: false,
       message: error.message,
