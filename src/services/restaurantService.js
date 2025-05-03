@@ -11,9 +11,9 @@ const createRestaurant = async (restaurantData, imageFile) => {
   }
 };
 //get all restaurants for customer
-const getAllRestaurantsForCustomer = async (category = null) => {
+const getAllRestaurantsForCustomer = async (cuisine = null) => {
   try {
-    const restaurants = await restaurantRepository.getAllRestaurantsForCustomer(category);
+    const restaurants = await restaurantRepository.getAllRestaurantsForCustomer(cuisine);
     return restaurants;
   } catch (error) {
     console.error('Error fetching restaurants:', error.message);

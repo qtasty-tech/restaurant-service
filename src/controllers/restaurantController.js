@@ -2,11 +2,10 @@ const restaurantService = require("../services/restaurantService");
 const Restaurant = require("../models/Restaurant");
 const Menu = require("../models/Menu");
 const Review = require("../models/Review");
-const axios = require('axios');
+const axios = require("axios");
 /**
  * Create a new restaurant.
  */
-
 
 const createRestaurant = async (req, res) => {
   try {
@@ -23,7 +22,7 @@ const createRestaurant = async (req, res) => {
       coverImage,
       image,
       phone,
-      location, 
+      location,
     } = req.body;
 
     // Validate required fields
@@ -45,13 +44,12 @@ const createRestaurant = async (req, res) => {
       deliveryTime: deliveryTime || 30,
       deliveryFee: deliveryFee || 0,
       tags: tags ? tags.split(",").map((tag) => tag.trim()) : [],
-      image, 
-      coverImageUrl: coverImage, 
-      phone, 
-      location, 
+      image,
+      coverImageUrl: coverImage,
+      phone,
+      location,
     };
 
-    
     const restaurant = await Restaurant.create(restaurantData);
 
     res.status(201).json({
@@ -87,9 +85,9 @@ const getAllRestaurants = async (req, res) => {
 //get all restaurants for customer
 const getAllRestaurantsForCustomer = async (req, res) => {
   try {
-    const category = req.query.category || null;
+    const cuisine = req.query.cuisine || null;
     const restaurants = await restaurantService.getAllRestaurantsForCustomer(
-      category
+      cuisine
     );
     res.status(200).json(restaurants);
   } catch (error) {
@@ -171,11 +169,14 @@ const getRestaurantDetails = async (req, res) => {
 const getRestaurantById = async (req, res) => {
   try {
     const { restaurantId } = req.params;
-    const { restaurant, menu, reviews } = await restaurantService.getRestaurantById(restaurantId);
+    const { restaurant, menu, reviews } =
+      await restaurantService.getRestaurantById(restaurantId);
 
-    c
+    c;
     if (!restaurant.isVerified) {
-      return res.status(400).json({ message: "Restaurant is not verified yet." });
+      return res
+        .status(400)
+        .json({ message: "Restaurant is not verified yet." });
     }
 
     res.status(200).json({

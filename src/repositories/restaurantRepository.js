@@ -31,16 +31,19 @@ const createRestaurant = async (restaurantData, imageFile) => {
   }
 };
 //get all restaurants for customer
-const getAllRestaurantsForCustomer = async (category = null) => {
+
+const getAllRestaurantsForCustomer = async (cuisine = null) => {
   const query = { isVerified: true };
 
-  if (category && category !== 'all') {
-    query.category = { $in: [category] };
+  if (cuisine && cuisine !== 'all') {
+    // Use case-insensitive regex for cuisine matching
+    query.cuisine = { $regex: new RegExp(`^${cuisine}$`, 'i') };
   }
 
   const restaurants = await Restaurant.find(query);
   return restaurants;
 };
+
 
 // Get restaurant by ID, including menu and reviews
 const getRestaurantById = async (restaurantId) => {
